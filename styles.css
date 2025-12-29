@@ -53,7 +53,7 @@ body {
 
 /* Background selector button */
 .bg-button {
-  position: fixed;
+  position: sticky;
   top: 16px;
   left: 16px;
   z-index: 999;
