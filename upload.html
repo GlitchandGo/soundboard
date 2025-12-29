@@ -114,7 +114,7 @@
 </head>
 <body>
   <div class="soundboard-container">
-    <a href="index.html" class="back-button" title="Back to Soundboard">
+    <a href="../index.html" class="back-button" title="Back to Soundboard">
       <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
         <path d="M9.707 14.707a1 1 0 01-1.414 0L3 9.414l5.293-5.293a1 1 0 111.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"/>
       </svg>
@@ -156,7 +156,8 @@
       const stored = JSON.parse(localStorage.getItem('customSounds') || '[]');
       stored.push({ label, dataUrl });
       localStorage.setItem('customSounds', JSON.stringify(stored));
-      window.location.href = 'index.html';
+      // return to root index
+      window.location.href = '../index.html';
     });
 
     // Reset all custom sounds
