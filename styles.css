@@ -187,6 +187,54 @@ h1 {
   font-size: 0.7rem;
 }
 
+/* Hotkey / keymap UI under each sound button */
+.sound-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.keymap-btn {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  width: 30px;
+  height: 22px;
+  border-radius: 8px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #fff;
+
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  transition: transform .05s ease, background .15s ease, border-color .15s ease;
+}
+.keymap-btn:active { transform: translateY(1px); }
+.keymap-btn:hover { background: rgba(0,0,0,0.55); border-color: rgba(255,255,255,0.25); }
+
+.keymap-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.keymap-pill {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 10px;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #fff;
+  user-select: none;
+}
+
 /* Mode controls between buttons and footer */
 .mode-bar {
   margin: 30px 0 20px;
