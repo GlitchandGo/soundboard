@@ -368,7 +368,8 @@
     }
 
     function encodeFileName(name){
-      return encodeURI(name + '.jpg');
+      // images now live in images/ directory
+      return 'images/' + encodeURI(name + '.jpg');
     }
 
     function getAllOptions(){
@@ -389,7 +390,8 @@
       try{
         localStorage.setItem('soundboardBackground', JSON.stringify(selection));
       }catch(e){}
-      window.location.href = 'index.html';
+      // navigate back to root index.html
+      window.location.href = '../index.html';
     }
 
     // ---- Build UI: colors ---------------------------------------------------
