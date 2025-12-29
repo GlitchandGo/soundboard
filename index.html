@@ -13,15 +13,13 @@
 <body>
   
   <div class="soundboard-container">
-  <a href="background/index.html" class="bg-button" title="Change background">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
-      <!-- simplified icon to avoid truncated path -->
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
-    </svg>
-    Background
-  </a>
+    <a href="background/index.html" class="bg-button" title="Change background">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
+      </svg>
+      Background
+    </a>
     
-    <!-- Upload page link -->
     <a href="upload/index.html" class="upload-button" title="Upload Sound">
       <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
         <path d="M5 10l5-5 5 5H11v4H9v-4H5z M3 16h14v-2H3v2z"/>
@@ -36,14 +34,14 @@
       <input type="number" id="volume-input" min="0" max="1000000" value="100" />%
     </div>
 
-    <!-- Search + color filter -->
-    <div class="search-filter">
+    <!-- Enhanced Search & Filter UI -->
+    <div class="search-section">
       <input id="search" type="search" placeholder="Search sounds..." autocomplete="off" />
-      <div class="filter-row" aria-label="Filter by button color">
-        <label class="filter-chip"><input type="checkbox" value="green" checked> Green</label>
-        <label class="filter-chip"><input type="checkbox" value="red" checked> Red</label>
-        <label class="filter-chip"><input type="checkbox" value="yellow" checked> Yellow</label>
-        <label class="filter-chip"><input type="checkbox" value="orange" checked> Orange</label>
+      <div class="filter-group">
+        <label class="filter-chip chip-green"><input type="checkbox" value="green" checked> Green</label>
+        <label class="filter-chip chip-red"><input type="checkbox" value="red" checked> Red</label>
+        <label class="filter-chip chip-yellow"><input type="checkbox" value="yellow" checked> Yellow</label>
+        <label class="filter-chip chip-orange"><input type="checkbox" value="orange" checked> Orange</label>
       </div>
     </div>
 
@@ -161,7 +159,7 @@
       <button class="sound-button" data-sound="adultscheer.mp3" data-color="green">cheer</button>
       <button class="sound-button" data-sound="kachow.mp3" data-color="green">kachow</button>
     </div>
-    <!-- Mode controls between buttons and footer -->
+
     <div class="mode-bar">
       <button id="chaos-btn">Chaos (C)</button>
       <button id="loop-btn">Loop (L)</button>
