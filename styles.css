@@ -127,6 +127,50 @@ h1 {
   text-align: right;
 }
 
+/* Search + filter */
+.search-filter {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+#search {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(0,0,0,0.35);
+  color: #fff;
+  outline: none;
+  font-family: 'Bubblegum Sans', cursive;
+  font-size: 1.1rem;
+}
+#search::placeholder { color: rgba(255,255,255,0.65); }
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #fff;
+  font-size: 0.95rem;
+  user-select: none;
+}
+.filter-chip input {
+  width: 16px;
+  height: 16px;
+}
+
 /* Button grid */
 .buttons {
   display: grid;
@@ -140,14 +184,13 @@ h1 {
   position: relative;
   width: 70px;
   height: 70px;
-  background: radial-gradient(circle at 30% 30%, #e74c3c, #c0392b);
   border: none;
   border-radius: 50%;
   color: #fff;
   font-size: 1rem;
   cursor: pointer;
   box-shadow:
-    0 4px #932b26,
+    0 4px rgba(0,0,0,0.35),
     0 6px 10px rgba(0, 0, 0, 0.3);
   overflow: hidden;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
@@ -158,10 +201,27 @@ h1 {
   padding: 5px;
   line-height: 1.2;
 }
+
+/* Default color is GREEN */
+.sound-button {
+  background: radial-gradient(circle at 30% 30%, #4ade80, #16a34a);
+}
+.sound-button[data-color="red"] {
+  background: radial-gradient(circle at 30% 30%, #fb7185, #e11d48);
+}
+.sound-button[data-color="yellow"] {
+  background: radial-gradient(circle at 30% 30%, #fde047, #f59e0b);
+  color: #1a1300;
+}
+.sound-button[data-color="orange"] {
+  background: radial-gradient(circle at 30% 30%, #fdba74, #f97316);
+  color: #1a1300;
+}
+
 .sound-button:active {
   transform: translateY(4px);
   box-shadow:
-    0 2px #932b26,
+    0 2px rgba(0,0,0,0.35),
     0 4px 6px rgba(0, 0, 0, 0.3);
 }
 .sound-button::before {
@@ -233,6 +293,11 @@ h1 {
   border: 1px solid rgba(255,255,255,0.18);
   color: #fff;
   user-select: none;
+}
+
+/* Hide filtered-out buttons (we'll toggle .hidden via JS) */
+.sound-item.hidden {
+  display: none;
 }
 
 /* Mode controls between buttons and footer */
