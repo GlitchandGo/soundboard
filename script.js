@@ -8,6 +8,10 @@ const chaosBtn = document.getElementById('chaos-btn');
 const loopBtn  = document.getElementById('loop-btn');
 const stopBtn  = document.getElementById('stop-btn');
 
+// Search / filter elements
+const searchInput = document.getElementById('search');
+const filterRow = document.querySelector('.filter-row');
+
 // AudioContext & Gain for volume (0–1000%)
 const context = new (window.AudioContext||window.webkitAudioContext)();
 const gainNode = context.createGain();
@@ -109,11 +113,6 @@ volInput.addEventListener('input', () => {
 });
 
 // ---- Drag & drop reorder ---------------------------------------------------
-// We persist order based on a stable per-button id.
-//
-// For built-in buttons we derive it from their original dataset sound (the mp3 filename)
-// and keep it in data-id.
-// For uploaded buttons we assign a generated id stored alongside customSounds so it persists.
 function loadOrder() {
   try {
     const raw = localStorage.getItem(ORDER_KEY);
@@ -137,16 +136,13 @@ function applyOrderToDOM(orderIds) {
 
   const byId = new Map();
   Array.from(container.querySelectorAll('.sound-button')).forEach(btn => {
-    if (btn.dataset.id) byId.set(btn.dataset.id, btn);
+    if (btn.dataset.id) byId.set(btn.dataset.id, btn.closest('.sound-item') || btn);
   });
 
-  // Append in requested order (existing only)
   orderIds.forEach(id => {
     const el = byId.get(id);
     if (el) container.appendChild(el);
   });
-
-  // Any new buttons not in orderIds stay at the end (current order) — no action needed
 }
 
 let draggingEl = null;
@@ -155,9 +151,8 @@ function setDragEnabled(btn) {
   btn.draggable = true;
 
   btn.addEventListener('dragstart', (e) => {
-    draggingEl = btn;
+    draggingEl = btn.closest('.sound-item') || btn;
     btn.classList.add('dragging');
-    // Required for Firefox to start drag
     try { e.dataTransfer.setData('text/plain', btn.dataset.id || ''); } catch (_) {}
     e.dataTransfer.effectAllowed = 'move';
   });
@@ -176,18 +171,17 @@ function setDragEnabled(btn) {
   btn.addEventListener('drop', (e) => {
     e.preventDefault();
     if (!draggingEl) return;
-    if (draggingEl === btn) return;
 
-    // Decide insert before/after based on mouse position
-    const rect = btn.getBoundingClientRect();
+    const target = btn.closest('.sound-item') || btn;
+    if (draggingEl === target) return;
+
+    const rect = target.getBoundingClientRect();
     const isAfter = (e.clientY - rect.top) > (rect.height / 2);
 
     if (isAfter) {
-      // insert after target
-      container.insertBefore(draggingEl, btn.nextSibling);
+      container.insertBefore(draggingEl, target.nextSibling);
     } else {
-      // insert before target
-      container.insertBefore(draggingEl, btn);
+      container.insertBefore(draggingEl, target);
     }
 
     saveOrderFromDOM();
@@ -208,9 +202,7 @@ function saveHotkeys(map) {
 }
 function normalizeKey(k) {
   if (!k) return '';
-  // keep single-character keys lowercased
   if (k.length === 1) return k.toLowerCase();
-  // normalize common special keys
   const lower = k.toLowerCase();
   if (lower === ' ') return 'space';
   return lower;
@@ -218,20 +210,15 @@ function normalizeKey(k) {
 function isValidAssignableKey(key) {
   if (!key) return false;
   const k = normalizeKey(key);
-
-  // reserved
   if (RESERVED_KEYS.has(k)) return false;
 
-  // block modifier-only keys
   const blocked = new Set(['shift','control','alt','meta','capslock','tab','escape','esc']);
   if (blocked.has(k)) return false;
 
-  // allow single characters + some special keys
   if (k.length === 1) return true;
   const allowedSpecial = new Set(['enter','backspace','space','arrowup','arrowdown','arrowleft','arrowright']);
   return allowedSpecial.has(k);
 }
-
 function invertHotkeys(map) {
   const inv = {};
   Object.keys(map || {}).forEach(btnId => {
@@ -240,7 +227,6 @@ function invertHotkeys(map) {
   });
   return inv;
 }
-
 function setButtonHotkey(btn, key) {
   const k = key ? normalizeKey(key) : '';
   btn.dataset.hotkey = k;
@@ -252,24 +238,20 @@ function setButtonHotkey(btn, key) {
 
   pill.textContent = k ? `Key: ${k}` : 'Key: —';
 }
-
 function startKeyCaptureFor(btn) {
   const wrap = btn.closest('.sound-item');
   if (!wrap) return;
-  const trigger = wrap.querySelector('.keymap-btn');
   const pill = wrap.querySelector('.keymap-pill');
-  if (!trigger || !pill) return;
+  if (!pill) return;
 
-  keyCapture = { buttonId: btn.dataset.id, triggerEl: trigger, pillEl: pill };
+  keyCapture = { buttonId: btn.dataset.id };
   pill.textContent = 'Press a key... (Esc to cancel)';
 }
-
-function stopKeyCapture(cancelled = true) {
+function stopKeyCapture() {
   if (!keyCapture) return;
   const { buttonId } = keyCapture;
   keyCapture = null;
 
-  // restore pill from storage
   const map = loadHotkeys();
   const key = map[buttonId] || '';
   const btn = document.querySelector(`.sound-button[data-id="${CSS.escape(buttonId)}"]`);
@@ -278,7 +260,6 @@ function stopKeyCapture(cancelled = true) {
 
 // Wrap each sound button in a .sound-item and add the map icon + label pill
 function ensureHotkeyUIForButton(btn) {
-  // If already wrapped, do nothing
   if (btn.closest('.sound-item')) return;
 
   const wrapper = document.createElement('div');
@@ -330,7 +311,6 @@ function bindSoundButton(btn) {
 
 function ensureBuiltInIds() {
   document.querySelectorAll('.sound-button').forEach(btn => {
-    // If no id yet, derive from original sound identifier (mp3 filename)
     if (!btn.dataset.id) {
       const s = btn.dataset.sound || '';
       btn.dataset.id = 'builtin:' + s;
@@ -338,13 +318,47 @@ function ensureBuiltInIds() {
   });
 }
 
+// Ensure every button has a color (default green)
+function ensureColors() {
+  document.querySelectorAll('.sound-button').forEach(btn => {
+    if (!btn.dataset.color) btn.dataset.color = 'green';
+  });
+}
+
 function makeId() {
   return 'cs:' + Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
+}
+
+// ---- Search + filter -------------------------------------------------------
+function getEnabledColors() {
+  if (!filterRow) return new Set(['green','red','yellow','orange']);
+  const checks = Array.from(filterRow.querySelectorAll('input[type="checkbox"]'));
+  const enabled = checks.filter(c => c.checked).map(c => c.value);
+  return new Set(enabled);
+}
+
+function applySearchAndFilter() {
+  const q = (searchInput ? searchInput.value : '').trim().toLowerCase();
+  const enabledColors = getEnabledColors();
+
+  document.querySelectorAll('.sound-item').forEach(item => {
+    const btn = item.querySelector('.sound-button');
+    if (!btn) return;
+
+    const label = (btn.textContent || '').toLowerCase();
+    const color = (btn.dataset.color || 'green').toLowerCase();
+
+    const matchesText = !q || label.includes(q);
+    const matchesColor = enabledColors.has(color);
+
+    item.classList.toggle('hidden', !(matchesText && matchesColor));
+  });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   // built-in ids + binding
   ensureBuiltInIds();
+  ensureColors();
   document.querySelectorAll('.sound-button').forEach(bindSoundButton);
 
   // load user-uploaded
@@ -365,9 +379,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const btn = document.createElement('button');
     btn.className   = 'sound-button';
     btn.textContent = item.label;
-    // stored item.dataUrl is already a data URL — leave as-is so resolveSoundPath will not alter it
     btn.dataset.sound = item.dataUrl;
     btn.dataset.id = item.id;
+    btn.dataset.color = item.color || 'green'; // default green for uploaded too
     container.appendChild(btn);
     bindSoundButton(btn);
   });
@@ -382,6 +396,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const k = hotkeys[btn.dataset.id] || '';
     setButtonHotkey(btn, k);
   });
+
+  // wire search/filter
+  if (searchInput) {
+    searchInput.addEventListener('input', applySearchAndFilter);
+  }
+  if (filterRow) {
+    filterRow.addEventListener('change', applySearchAndFilter);
+  }
+  applySearchAndFilter();
 });
 
 // Keyboard shortcuts (including user-assigned hotkeys)
@@ -392,15 +415,14 @@ document.addEventListener('keydown', e => {
   if (keyCapture) {
     const normalized = normalizeKey(kRaw);
 
-    // allow cancel
     if (normalized === 'escape' || normalized === 'esc') {
-      stopKeyCapture(true);
+      stopKeyCapture();
       return;
     }
 
     if (!isValidAssignableKey(kRaw)) {
       alert('That key cannot be assigned. Please choose another key (not C, L, or S).');
-      stopKeyCapture(true);
+      stopKeyCapture();
       return;
     }
 
@@ -413,14 +435,12 @@ document.addEventListener('keydown', e => {
       delete map[otherBtnId];
     }
 
-    // assign
     map[keyCapture.buttonId] = normalizeKey(kRaw);
     saveHotkeys(map);
 
     const btn = document.querySelector(`.sound-button[data-id="${CSS.escape(keyCapture.buttonId)}"]`);
     if (btn) setButtonHotkey(btn, map[keyCapture.buttonId]);
 
-    // also update other button if it lost this key
     if (otherBtnId && otherBtnId !== keyCapture.buttonId) {
       const otherBtn = document.querySelector(`.sound-button[data-id="${CSS.escape(otherBtnId)}"]`);
       if (otherBtn) setButtonHotkey(otherBtn, '');
@@ -468,7 +488,7 @@ stopBtn.addEventListener('click', stopAll);
     if(bg.type === 'color'){
       body.style.background = bg.value;
       body.style.backgroundSize = 'cover';
-      body.style.animation = 'none'; // disable animated gradient
+      body.style.animation = 'none';
     } else if(bg.type === 'image'){
       const img = resolveImagePath(bg.value);
       body.style.background = `url('${img}') center/cover no-repeat, #0f0f12`;
