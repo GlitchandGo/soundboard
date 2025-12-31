@@ -37,6 +37,32 @@ function resolveImagePath(p) {
   return path.startsWith('images/') ? path : 'images/' + path;
 }
 
+function clamp(n, min, max) {
+  n = Number(n);
+  if (Number.isNaN(n)) return min;
+  return Math.min(max, Math.max(min, n));
+}
+
+function setVolumeFromUI() {
+  // SLIDER IS 0-100 (PERCENT SHOWN), INPUT IS 0-1000 (ALLOWS BOOST)
+  const sliderVal = clamp(slider.value, 0, 100);
+  const inputVal  = clamp(volInput.value, 0, 1000);
+
+  // IF USER MOVES SLIDER, KEEP INPUT IN SYNC UP TO 100
+  // (INPUT CAN STILL BE TYPED ABOVE 100 MANUALLY)
+  if (document.activeElement === slider) {
+    volInput.value = String(sliderVal);
+  }
+
+  // IF USER TYPES, KEEP SLIDER IN SYNC BUT CLAMPED TO 0-100
+  if (document.activeElement === volInput) {
+    slider.value = String(clamp(inputVal, 0, 100));
+  }
+
+  // MAP 0-1000 -> 0.0-10.0 GAIN
+  gainNode.gain.value = inputVal / 100;
+}
+
 function playSound(srcIdentifier) {
   context.resume();
   if (!chaosMode) stopAll();
@@ -123,6 +149,17 @@ function initButton(btn) {
 
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.sound-button').forEach(initButton);
+
+  // INIT VOLUME UI + EVENTS
+  setVolumeFromUI();
+  slider.addEventListener('input', setVolumeFromUI);
+  volInput.addEventListener('input', setVolumeFromUI);
+  volInput.addEventListener('change', () => {
+    // HARD CLAMP TYPED VALUE ON BLUR/ENTER
+    volInput.value = String(clamp(volInput.value, 0, 1000));
+    slider.value = String(clamp(volInput.value, 0, 100));
+    setVolumeFromUI();
+  });
 
   // Load Custom
   const custom = JSON.parse(localStorage.getItem('customSounds') || '[]');
